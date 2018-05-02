@@ -13,6 +13,27 @@ CREATE TABLE IF NOT EXISTS TELEGRAM (
 	PRIMARY KEY(Userid)
 );
 
+CREATE TABLE IF NOT EXISTS QUERECORD (
+	ID int(12) NOT NULL auto_increment,
+	QDate DATE NOT NULL,
+	Qid int(6) NOT NULL,
+	Userid int(24) NOT NULL,
+	PRIMARY KEY(ID)
+);
+	
+
+CREATE TABLE IF NOT EXISTS ANSRECORD (
+	ID int(12) NOT NULL auto_increment,
+	Qid int(12) NOT NULL,
+	ADate DATE NOT NULL,
+	Userid int(24) NOT NULL,
+	Reply varchar(1) NOT NULL,
+	Correct int(1),
+	PRIMARY KEY(ID),
+	FOREIGN KEY(Qid) REFERENCES QUERECORD(ID)
+);
+	
+
 INSERT INTO HKDSEMATH (Qid, Year, Qno, Ans, Qpath)
 VALUES 
 (201701, 2017, 1, 'A', './data/2017/1.png'),

@@ -24,6 +24,10 @@ def __question__(bot, update, args):
     else:
         r = re.compile('^[0-9]{6}$')
         search = ', '.join(list(filter(r.match, args)))
+        if not search:
+            update.message.reply_text('似乎冇你 search 嘅嘢')
+            config['logger'].info('  > Action: /question Error, From user: %s' % (user_id))
+            return
         query = 'SELECT * FROM HKDSEMATH WHERE Qid in ({0});'.format(search)
         cur.execute(query)
         results = cur.fetchall()

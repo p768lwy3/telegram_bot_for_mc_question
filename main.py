@@ -5,19 +5,8 @@ import pymysql
 import telegram
 from telegram.ext import Filters, Updater, CallbackQueryHandler, CommandHandler, MessageHandler, ConversationHandler, InlineQueryHandler
 
-#xresult = range(0)
+greply = range(0)
 
-"""
-def __dbtest__(bot, update, args):
-    chat_id = update.message.chat_id
-    
-    query = 'SELECT Qpath FROM HKDSEMATH WHERE Qid = "{0}";'.format(args[0])
-    cur.execute(query)
-    qpath = cur.fetchall()
-
-    bot.send_photo(chat_id = chat_id, photo = open(qpath[0][0], 'rb'))
-    return
-"""
 
 if __name__ == "__main__":
 
@@ -28,27 +17,23 @@ if __name__ == "__main__":
     # add handler
     dp.add_handler(CommandHandler('question', action.__question__, pass_args = True))
     dp.add_handler(CommandHandler('checkans', action.__check__, pass_args = True))
-    #dp.add_handler(CommandHandler('help', action.__help__))
-    #dp.add_handler(MessageHandler(Filters.command, action.__unknown__))
-    #dp.add_handler(CommandHandler('check', __check__, pass_args=True))
-    
-    #dp.add_handler(CommandHandler('gamestart', __gamestart__, pass_chat_data = True))
-    #dp.add_handler(CommandHandler('join', __join__, pass_chat_data = True))
+    dp.add_handler(CommandHandler('gamestart', game.__start__, pass_chat_data = True))
+    dp.add_handler(CommandHandler('gamereset', game.__reset__, pass_chat_data = True))
+    dp.add_handler(CommandHandler('gamecancel', game.__cancel__, pass_chat_data = True))
+    dp.add_handler(CommandHandler('join', game.__join__, pass_chat_data = True))
     #dp.add_handler(CommandHandler('quit', __quit__, pass_user_data = True, pass_chat_data = True))
-    #dp.add_handler(CommandHandler('cancelgame', __cancelgame__, pass_chat_data = True))
-    
+    dp.add_handler(CommandHandler('kick', game.__kick__, pass_args = True, pass_chat_data = True))
+    dp.add_handler(CommandHandler('addadmin', game.__addadmin__, pass_args = True, pass_chat_data = True))
+    dp.add_handler(CommandHandler('record', game.__grecord__, pass_chat_data = True))
+    dp.add_handler(CommandHandler('gamequestion', game.__gquestion__, pass_chat_data = True))
+    dp.add_handler(CommandHandler('gamecheck', game.__gcheckans__, pass_chat_data = True))
+    dp.add_handler(CallbackQueryHandler(game.__greply__))
 
-    #dp.add_handler(CommandHandler('gamequestion', __gamequestion__, pass_chat_data = True))
-    #dp.add_handler(CommandHandler('gamerecord', __gamerecord__, pass_chat_data = True))
-    #dp.add_handler(CallbackQueryHandler(__Xresult__, pass_chat_data = True))
-    #dp.add_handler(
-    #dp.add_handler(CommandHandler('addadmin', __addadmin__, pass_args = True, pass_chat_data = True))
     #dp.add_handler(CommandHandler('selfquestion', __selfquestion__, pass_args = True))
-    # 
-    # dp.add_handler()
     
-
-    #dp.add_handler(InlineQueryHandler(__inlineanswer__))
+    dp.add_handler(CommandHandler('print', game.__print__, pass_chat_data = True))
+    dp.add_handler(CommandHandler('help', action.__help__))
+    dp.add_handler(MessageHandler(Filters.command, action.__unknown__))
     
     updater.start_polling()
     updater.idle()
