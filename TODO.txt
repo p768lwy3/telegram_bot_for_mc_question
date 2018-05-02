@@ -1,3 +1,0 @@
-after addadmin cannot give the question to them...
-Non-embedded MC (voting generator)
-use database to save userid and username and path to pic so on so forth.
