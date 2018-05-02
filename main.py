@@ -1,20 +1,35 @@
 from bot import action, game, beta_function
 from bot.CONFIG import config
 
+import pymysql
 import telegram
 from telegram.ext import Filters, Updater, CallbackQueryHandler, CommandHandler, MessageHandler, ConversationHandler, InlineQueryHandler
 
 #xresult = range(0)
 
+"""
+def __dbtest__(bot, update, args):
+    chat_id = update.message.chat_id
+    
+    query = 'SELECT Qpath FROM HKDSEMATH WHERE Qid = "{0}";'.format(args[0])
+    cur.execute(query)
+    qpath = cur.fetchall()
+
+    bot.send_photo(chat_id = chat_id, photo = open(qpath[0][0], 'rb'))
+    return
+"""
+
 if __name__ == "__main__":
+
     updater = Updater(config['TGTOKEN'])
     dp = updater.dispatcher
+
     
     # add handler
     dp.add_handler(CommandHandler('question', action.__question__, pass_args = True))
     dp.add_handler(CommandHandler('checkans', action.__check__, pass_args = True))
-    dp.add_handler(CommandHandler('help', action.__help__))
-    dp.add_handler(MessageHandler(Filters.command, action.__unknown__))
+    #dp.add_handler(CommandHandler('help', action.__help__))
+    #dp.add_handler(MessageHandler(Filters.command, action.__unknown__))
     #dp.add_handler(CommandHandler('check', __check__, pass_args=True))
     
     #dp.add_handler(CommandHandler('gamestart', __gamestart__, pass_chat_data = True))

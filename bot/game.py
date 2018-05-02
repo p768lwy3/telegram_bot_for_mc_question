@@ -1,4 +1,4 @@
-from collection import Counter, OrderDict
+from collections import Counter, OrderedDict
 import os
 import pandas as pd
 import random
@@ -143,7 +143,7 @@ def __kick__(bot, update, args, chat_data):
         update.message.reply_text('冇權呀！')
         logger.info('  > Action: /kick Error (without permission), '\
             ' From user: %s' % (user_id))
-            return
+        return
         
     target_id = args[0] # some processing    
     if not target_id in chat_data['member']:

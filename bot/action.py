@@ -7,97 +7,59 @@ import time
 import telegram
 
 from bot.CONFIG import config
+from bot.DBCONFIG import con, cur
 
 def __question__(bot, update, args):
     chat_id = update.message.chat_id
     user_id = update.message.from_user.id
-    
     if len(args) <= 0:
-        # This could be change to random.choice(folder_list), 
-        # where adding a folder_list in config by search the data folder
-        year = str(random.randint(config['START'], config['END']))
-        folder = config['INPUT'] + ('%s/' % (year))
-        qnumber = str(random.randint(1, len(os.listdir(folder)) - 1))
+        query = 'SELECT * FROM HKDSEMATH ORDER BY RAND() LIMIT 1;'
+        cur.execute(query)
+        result = cur.fetchall()
+        year = result[0][1]; qnumber = result[0][2]; qpath = result[0][4]
         update.message.reply_text(('%s, Q.%s' % (year, qnumber)))
-        bot.send_photo(chat_id = chat_id, photo = open(folder + ('%s.png' % (qnumber)), 'rb'))
+        bot.send_photo(chat_id = chat_id, photo = open(qpath, 'rb'))
         config['logger'].info('  > Action: /question, From user: %s' % (user_id))
     
     else:
         r = re.compile('^[0-9]{6}$')
-        for arg in args:
-            if r.match(arg):
-                year = arg[:4]
-                qnumber = str(int(arg[4:]))
-                folder = config['INPUT'] + ('%s/' % (year))
-                if not os.path.isdir(folder):
-                    update.message.reply_text('冇呢年')
-                    config['logger'].info('  > Action: error /question %s %s ' \
-                        '(with unknown year), From user: %s' 
-                        % (year, qnumber, user_id))
-                    continue
-                pfile = folder + ('%s.png' % (qnumber))
-                if not os.path.exists(pfile):
-                    update.message.reply_text('冇呢題')
-                    config['logger'].info('  > Action: error /question %s %s ' \
-                        ' (with unknown question number), From user: %s' 
-                        % (year, qnumber, user_id))
-                    continue
-                update.message.reply_text('%s, Q.%s' % (year, qnumber))
-                bot.send_photo(chat_id = chat_id, photo = open(pfile, 'rb'))
-                config['logger'].info("  > Action: /question %s-%s, From user: %s" 
+        search = ', '.join(list(filter(r.match, args)))
+        query = 'SELECT * FROM HKDSEMATH WHERE Qid in ({0});'.format(search)
+        cur.execute(query)
+        results = cur.fetchall()
+        if not results:
+            update.message.reply_text('似乎冇你 search 嘅嘢')
+            config['logger'].info('  > Action: /question Error, From user: %s' % (user_id))
+            return
+        for row in results:
+            year = row[1]; qnumber = row[2]; qpath = row[4]
+            update.message.reply_text('%s, Q.%s' % (year, qnumber))
+            bot.send_photo(chat_id = chat_id, photo = open(qpath, 'rb'))
+            config['logger'].info("  > Action: /question %s-%s, From user: %s" 
                     % (year, qnumber, user_id))                
-            else:
-                update.message.reply_text('%s 唔岩格式！請用 /question YYYYQQ ' \
-'                   (e.g. 201701) 格式！' % (arg))
-                config['logger'].info(" > Action: /question Error (incorrect format), " \
-                    " From user: %s" % (user_id))
-                continue
-            time.sleep(5)
+            time.sleep(2)
     return
 
 def __check__(bot, update, args):
-    chat_id = update.message.chat_id
+    if not args:
+        update.message.reply_text('/check yyyyqq')
+        return
     user_id = update.message.from_user.id
     r = re.compile('^[0-9]{6}$')
-    if len(args) <= 0:
-        update.message.reply_text('%s 唔岩格式！請用 /question YYYYQQ ' \
-'                   (e.g. 201701) 格式！'% (arg))
-        config['logger'].info('  > Action: /check Error (incorrect format), From user: %s' % 
-            (user_id))
-    else:
-        for arg in args:
-            if r.match(arg):
-                year = arg[:4]
-                qnumber = int(arg[4:])
-                folder = config['INPUT'] + ('%s/' % (year))
-                if not os.path.isdir(folder):
-                    update.message.reply_text('冇呢年')
-                    config['logger'].info('  > Action: error /check %s %s ' \
-                        '(with unknown year), From user: %s' 
-                        % (year, qnumber, user_id))
-                    continue
-                afile = folder + 'ans.csv'
-                if not os.path.exists(afile):
-                    update.message.reply_text('冇呢年答案')
-                    config['logger'].info('  > Action: error /check %s %s ' \
-                        ' (with no answer file), From user: %s' 
-                        % (year, qnumber, user_id))
-                d = pd.read_csv(afile)
-                if not (d.index == (qnumber - 1)).any():
-                    update.message.reply_text('冇呢題答案')
-                    config['logger'].info('  > Action: error /check %s %s ' \
-                        ' (with no answer), From user: %s'
-                        % (year, qnumber, user_id))
-                ans = d.Ans[qnumber - 1]
-                update.message.reply_text('%s Q.%s Ans: %s ' % (year, qnumber, ans))
-                config['logger'].info('  >Action: /check %s %s ' \
-                    ' From user: %s' % (year, qnumber, user_id))
-            else:
-                update.message.reply_text('%s 唔岩格式！請用 /check YYYYQQ ' \
-'                       (e.g. 201701) 格式！'% (arg))
-                config['logger'].info('  > Action: /check Error (incorrect format), From user: %s' % 
-                    (user_id))
-                continue
+    search = ', '.join(list(filter(r.match, args)))
+    query = 'SELECT * FROM HKDSEMATH WHERE Qid in ({0});'.format(search)
+    cur.execute(query)
+    results = cur.fetchall()
+    if not results:
+        update.message.reply_text('似乎冇你 search 嘅嘢')
+        config['logger'].info('  > Action: /question Error, From user: %s' % (user_id))
+        return
+    for row in results:
+        year = row[1]; qnumber = row[2]; ans = row[3]
+        update.message.reply_text('%s, Q.%s, Ans: %s.' % (year, qnumber, ans))
+        config['logger'].info("  > Action: /check %s-%s, From user: %s" 
+            % (year, qnumber, user_id))   
+        time.sleep(2)          
     return
 
 def __unknown__(bot, update):
@@ -111,6 +73,3 @@ def __help__(bot, update):
     bot.send_message(chat_id = update.message.chat_id, text = text)
     config['logger'].info('  > Action: call /help, From user: %s' % (update.message.from_user.id))
     return
-
-def __answer__(bot, update):
-    pass
